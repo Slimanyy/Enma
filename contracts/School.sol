@@ -27,14 +27,6 @@ contract School {
         _;
     }
 
-    function updateSchoolName(string memory _nameOfSchool) public onlyPrincipal {
-        nameOfSchool = _nameOfSchool;
-    }
-
-    function updateSchoolFeesAmount(uint256 _schoolFeesAmount) public onlyPrincipal {
-        schoolFeesAmount = _schoolFeesAmount;
-    }
-
     function withdraw() public onlyPrincipal {
         payable(msg.sender).transfer(address(this).balance);
     }
