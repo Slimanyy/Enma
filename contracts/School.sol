@@ -35,6 +35,10 @@ contract School {
         schoolFeesAmount = _schoolFeesAmount;
     }
 
+    function withdraw() public onlyPrincipal {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
     enum feesStatus {
         NotPaid,
         Paid
@@ -58,7 +62,7 @@ contract School {
         delete teachers[_id];
     }
 
-    function searchTeacherbyId(uint256 _id) public view onlyPrincipal returns (string memory, string memory) {
+    function searchTeacherbyId(uint256 _id) public view returns (string memory, string memory) {
         return (teachers[_id].teacherName, teachers[_id].subject);
     }
 
@@ -87,11 +91,11 @@ contract School {
         return (students[_id].studentName, students[_id].paymentStatus);
     }
 
-    function paySchoolFees() public payable {
+    function paySchoolFees(uint256 fees) public onlyStudent payable {
         uint256 _id = StudentsId[msg.sender];
         require(students[_id].isRegistered, "Student is not registered");
         require(students[_id].paymentStatus == feesStatus.NotPaid, "Student has already paid");
-        require(msg.value == schoolFeesAmount, "Incorrect amount sent");
+        require(fees == schoolFeesAmount, "Incorrect schoolFeesAmount set");
         students[_id].paymentStatus = feesStatus.Paid;
     }
 }
