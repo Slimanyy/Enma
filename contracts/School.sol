@@ -4,30 +4,41 @@ pragma solidity ^0.8.28;
 contract School {
     address public principal;
     string public nameOfSchool; 
+    uint256 public schoolFeesAmount;
 
-    constructor(string memory _nameOfSchool) {
+    constructor(string memory _nameOfSchool, uint256 _schoolFeesAmount) {
         principal = msg.sender;
         nameOfSchool = _nameOfSchool;
-    
+        schoolFeesAmount = _schoolFeesAmount;
     }
+
     modifier onlyPrincipal() {
         require(msg.sender == principal, "You are not the Principal");
         _; 
     }
+
     modifier onlyPrincipalOrTeacher() {
         require(msg.sender == principal || teachers[teacherId[msg.sender]].isRegistered, "You are not the Principal or a Teacher");
-        _;
-        
+        _;   
     }
 
-    uint256 teacherCounter = 1;
-    uint256 studentCounter = 1;
+    modifier onlyStudent() {
+        require(students[StudentsId[msg.sender]].isRegistered, "Only Students are required to pay school fees");
+        _;
+    }
+
+    function updateSchoolName(string memory _nameOfSchool) public onlyPrincipal {
+        nameOfSchool = _nameOfSchool;
+    }
+
+    function updateSchoolFeesAmount(uint256 _schoolFeesAmount) public onlyPrincipal {
+        schoolFeesAmount = _schoolFeesAmount;
+    }
 
     enum feesStatus {
-    NotPaid,
-    Paid
-    }
-
+        NotPaid,
+        Paid
+        }
 
     struct Teachers {
         uint256 id;
@@ -51,8 +62,6 @@ contract School {
         return (teachers[_id].teacherName, teachers[_id].subject);
     }
 
-
-
     struct Students {
         uint256 id;
         string studentName;
@@ -70,9 +79,19 @@ contract School {
     }
 
     function removeStudent(uint256 _id) public onlyPrincipalOrTeacher {
-        require(students[_id].isRegistered, "Student is not registered");
+        require(students[_id].isRegistered, "You cant remove an unregistered Student");
         delete students[_id];
     }
 
+    function searchStudentbyId(uint256 _id) public view returns (string memory, feesStatus) {
+        return (students[_id].studentName, students[_id].paymentStatus);
+    }
 
+    function paySchoolFees() public payable {
+        uint256 _id = StudentsId[msg.sender];
+        require(students[_id].isRegistered, "Student is not registered");
+        require(students[_id].paymentStatus == feesStatus.NotPaid, "Student has already paid");
+        require(msg.value == schoolFeesAmount, "Incorrect amount sent");
+        students[_id].paymentStatus = feesStatus.Paid;
+    }
 }
