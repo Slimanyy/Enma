@@ -49,18 +49,20 @@ import {
         });
     });
 
- 
 
     describe("withdrawal", () => {
-        it("should remove amount", async () => {
-            let { deployedPiggyBank, member, manager,withdrawalDate } = await loadFixture(deployPiggyBankContract);        
-            const saveAmount = ethers.parseEther("100");
+        it("should remove whole balance", async () => {
+            let { deployedPiggyBank, member, manager,withdrawalDate, targetAmount } = await loadFixture(deployPiggyBankContract);        
+            const saveAmount = ethers.parseEther("1000");
+            // expect(targetAmount).to.greaterThan(saveAmount);
             await deployedPiggyBank.connect(member).save({ value:saveAmount });
+            
             await time.increaseTo(withdrawalDate);
             // const amount = ethers.parseEther("100");
             await deployedPiggyBank.connect(manager).withdrawal();
         });
     });
+
 
   });
   
