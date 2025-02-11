@@ -1,5 +1,7 @@
-// SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.28;
+
+import "./erc721.sol";
 
 contract EventContract {
     enum EventType {
@@ -19,6 +21,7 @@ contract EventContract {
         uint32 _registeredGuestCount;
         uint32 _verifiedGuestCount;
         address _organizer;
+        address _ticketAddress;
     }
 
     uint256 public event_count;
@@ -53,7 +56,8 @@ contract EventContract {
             _expectedGuestCount: _egc,
             _registeredGuestCount: 0,
             _verifiedGuestCount: 0,
-            _organizer: msg.sender 
+            _organizer: msg.sender,
+            _ticketAddress: address(0) 
         });
 
         events[_eventId] = _updatedEvent;
@@ -99,6 +103,26 @@ contract EventContract {
 
         }
     } 
+
+
+    function createEventTicket (uint256 _eventId, string memory _ticketname, string memory _ticketSymbol) external {
+
+        require(_eventId <= event_count && _eventId != 0, 'EVENT DOESNT EXIST');
+        
+        EventDetails memory _eventInstance = events[_eventId];
+
+        require(msg.sender == _eventInstance._organizer, 'ONLY ORGANIZER CAN CREATE');
+
+        require(_eventInstance._ticketAddress == address(0), 'TICKET ALREADY CREATED');
+
+        Tickets newTicket = new Tickets(address(this), _ticketname, _ticketSymbol);
+
+        events[_eventId]._ticketAddress = address(newTicket);
+
+        // _eventInstance._ticketAddress = address(newTicket);
+
+    }
+
 
     // confirm/validate of tickets
 
