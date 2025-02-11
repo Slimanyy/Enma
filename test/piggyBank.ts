@@ -10,7 +10,7 @@ import {
     const deployPiggyBankContract = async () => {
       const [manager,member] = await hre.ethers.getSigners(); 
       const targetAmount = hre.ethers.parseEther("1000");
-      const withdrawalDate = Math.floor(new Date(2025, 1, 10).getTime() / 1000);  
+      const withdrawalDate = Math.floor(new Date(2025, 10, 10).getTime() / 1000);  
       const PiggyBank = await hre.ethers.getContractFactory("piggyBank");
       const deployedPiggyBank = await PiggyBank.deploy(
         targetAmount,
@@ -43,9 +43,11 @@ import {
 
     describe("save", () => {
         it("should deposit amount", async () => {
-            let { deployedPiggyBank, member, targetAmount } = await loadFixture(deployPiggyBankContract);       
+            let { deployedPiggyBank, member } = await loadFixture(deployPiggyBankContract);       
             const amount = ethers.parseEther("100");
             await deployedPiggyBank.connect(member).save({ value: amount });
+            const memberBal= await deployedPiggyBank.contributions(member.address);
+            expect(memberBal).to.equal(amount)
         });
     });
 
@@ -54,15 +56,14 @@ import {
         it("should remove whole balance", async () => {
             let { deployedPiggyBank, member, manager,withdrawalDate, targetAmount } = await loadFixture(deployPiggyBankContract);        
             const saveAmount = ethers.parseEther("1000");
-            // expect(targetAmount).to.greaterThan(saveAmount);
-            await deployedPiggyBank.connect(member).save({ value:saveAmount });
-            
-            await time.increaseTo(withdrawalDate);
-            // const amount = ethers.parseEther("100");
+            await deployedPiggyBank.connect(member).save({ value:saveAmount });         
+            await time.increaseTo(withdrawalDate); 
+            const contractBalanceBefore = await ethers.provider.getBalance(deployedPiggyBank.target);
+            expect(contractBalanceBefore).to.greaterThanOrEqual(targetAmount);
             await deployedPiggyBank.connect(manager).withdrawal();
+            const contractBalanceAfter = await ethers.provider.getBalance(deployedPiggyBank.target);
+            expect(contractBalanceAfter).to.lessThan(contractBalanceBefore);
         });
     });
-
-
   });
   
