@@ -43,7 +43,7 @@ import {
 
     describe("save", () => {
         it("should deposit amount", async () => {
-            let { deployedPiggyBank, member } = await loadFixture(deployPiggyBankContract);       
+            let { deployedPiggyBank, member, targetAmount } = await loadFixture(deployPiggyBankContract);       
             const amount = ethers.parseEther("100");
             await deployedPiggyBank.connect(member).save({ value: amount });
         });

@@ -6,6 +6,37 @@ contract School {
     string public nameOfSchool; 
     uint256 public schoolFeesAmount;
 
+    //Events
+     event teacherAdded (
+        string _teacherName,
+        string _subject
+     );
+
+     event teacherSacked ( 
+        string _teacherName,
+        string _subject
+    );
+
+     event studedntAdded (
+        string _studentName,
+        address _studentwalletAdress
+    );
+
+     event studentRemoved (
+        string _studentName,
+        address _studentwalletAdress
+    );
+
+     event feesPaid( 
+        string _studentName,
+        uint256 amount
+    );
+
+     event Withdrawn(
+        uint256 amount,
+        uint256 time
+    );
+
     constructor(string memory _nameOfSchool, uint256 _schoolFeesAmount) {
         principal = msg.sender;
         nameOfSchool = _nameOfSchool;
@@ -28,7 +59,9 @@ contract School {
     }
 
     function withdraw() public onlyPrincipal {
+        uint256 _contractBal = address(this).balance;
         payable(msg.sender).transfer(address(this).balance);
+        emit Withdrawn(_contractBal, block.timestamp);
     }
 
     enum feesStatus {
@@ -47,11 +80,13 @@ contract School {
 
     function addTeacher(uint256 _id, string memory _teacherName, string memory _subject) public onlyPrincipal {
         teachers[_id] = Teachers(_id, _teacherName, _subject, true);
+        emit teacherAdded(_teacherName, _subject);
     }
 
     function sackTeacher(uint256 _id) public onlyPrincipal {
         require(teachers[_id].isRegistered, "Teacher is not registered");
         delete teachers[_id];
+        emit teacherSacked(teachers[_id].teacherName, teachers[_id].subject);
     }
 
     function searchTeacherbyId(uint256 _id) public view returns (string memory, string memory) {
@@ -72,11 +107,13 @@ contract School {
     function addStudent(uint256 _id, string memory _studentName, address _studentwalletAdress) public onlyPrincipalOrTeacher{
         require(!students[StudentsId[_studentwalletAdress]].isRegistered, "Student is already registered");
         students[_id] = Students(_id, _studentName, true, _studentwalletAdress, feesStatus.NotPaid);
+        emit studedntAdded(_studentName, _studentwalletAdress);
     }
 
     function removeStudent(uint256 _id) public onlyPrincipalOrTeacher {
         require(students[_id].isRegistered, "You cant remove an unregistered Student");
         delete students[_id];
+        emit studentRemoved(students[_id].studentName, students[_id].studentwalletAddress);
     }
 
     function searchStudentbyId(uint256 _id) public view returns (string memory, feesStatus) {
@@ -89,5 +126,6 @@ contract School {
         require(students[_id].paymentStatus == feesStatus.NotPaid, "Student has already paid");
         require(fees == schoolFeesAmount, "Incorrect schoolFeesAmount set");
         students[_id].paymentStatus = feesStatus.Paid;
+        emit feesPaid(students[_id].studentName, schoolFeesAmount);
     }
 }
