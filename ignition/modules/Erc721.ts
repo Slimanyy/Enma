@@ -5,8 +5,8 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 
 const Erc721Module = buildModule("Erc721", (m) => {
-     const name = "Slimany";
-     const symbol = "SLM";
+     const name = "SlimanyNFT";
+     const symbol = "SLMNFT";
      // const tokenSupply = 6420;
      // const tokenSupply = m.getParameter("tokenAmount", 6420);
 

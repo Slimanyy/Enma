@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.28;
 
-contract ERC20 {
+contract Token {
     string public name;
     string public symbol;
     uint8 public immutable decimals;

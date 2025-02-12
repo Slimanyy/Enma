@@ -10,7 +10,7 @@ const TokenkModule = buildModule("token", (m) => {
      // const decimals = m.getParameter("decimals", 18);
      const tokenSupply = m.getParameter("tokenAmount", 6420);
 
-  const Token = m.contract("ERC20", [name, symbol, tokenSupply]);
+  const Token = m.contract("Token", [name, symbol, tokenSupply]);
 
   return { Token };
 });
